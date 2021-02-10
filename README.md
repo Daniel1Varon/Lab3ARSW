@@ -43,8 +43,13 @@ Sincronización y Dead-Locks.
 	* El juego podría nunca tener un único ganador. Lo más probable es que al final sólo queden dos, peleando indefinidamente quitando y sumando puntos de vida.
 
 2. Revise el código e identifique cómo se implemento la funcionalidad antes indicada. Dada la intención del juego, un invariante debería ser que la sumatoria de los puntos de vida de todos los jugadores siempre sea el mismo(claro está, en un instante de tiempo en el que no esté en proceso una operación de incremento/reducción de tiempo). Para este caso, para N jugadores, cual debería ser este valor?.
+**Rta.** Para el n correspondiente al numero de jugadores se tiene una variable en la clase ControlFrame la cual se llama numOfImmortals.
+   Para que cada inmortal conozca a los demas jugadores se utiliza un random y una variable de verificación del index propio.
+   Para el ataque se verifica que tenga vida y lo ataca, de lo contrario notifica que el contrincante esta muerto.
+   Para n jugadores la vida total es n*100 siendo 100 la vida de cada jugador.
 
 3. Ejecute la aplicación y verifique cómo funcionan las opción ‘pause and check’. Se cumple el invariante?.
+**Rta.** No se cumple la invariante ya que al usar la opcion pause and check cada vez va incrementando la vida total mas de lo debido.
 
 4. Una primera hipótesis para que se presente la condición de carrera para dicha función (pause and check), es que el programa consulta la lista cuyos valores va a imprimir, a la vez que otros hilos modifican sus valores. Para corregir esto, haga lo que sea necesario para que efectivamente, antes de imprimir los resultados actuales, se pausen todos los demás hilos. Adicionalmente, implemente la opción ‘resume’.
 

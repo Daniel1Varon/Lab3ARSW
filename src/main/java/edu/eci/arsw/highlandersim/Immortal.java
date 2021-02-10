@@ -2,8 +2,11 @@ package edu.eci.arsw.highlandersim;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Semaphore;
 
 public class Immortal extends Thread {
+
+    private Semaphore mutex = new Semaphore(1);
 
     private ImmortalUpdateReportCallback updateCallback=null;
     
@@ -17,6 +20,7 @@ public class Immortal extends Thread {
 
     private final Random r = new Random(System.currentTimeMillis());
 
+    private boolean alive = true;
 
     public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb) {
         super(name);
@@ -29,7 +33,7 @@ public class Immortal extends Thread {
 
     public void run() {
 
-        while (true) {
+        while (alive) {
             Immortal im;
 
             int myIndex = immortalsPopulation.indexOf(this);
@@ -43,35 +47,41 @@ public class Immortal extends Thread {
 
             im = immortalsPopulation.get(nextFighterIndex);
 
-            this.fight(im);
+            try {
+                this.fight(im);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
         }
 
     }
 
-    public void fight(Immortal i2) {
+    public void fight(Immortal i2) throws InterruptedException {
 
         if (i2.getHealth() > 0) {
+            mutex.acquire();
             i2.changeHealth(i2.getHealth() - defaultDamageValue);
             this.health += defaultDamageValue;
             updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
+            if(i2.getHealth()<=0) i2.dead();
+            mutex.release();
         } else {
             updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
         }
 
     }
 
-    public void changeHealth(int v) {
+    public synchronized void changeHealth(int v) {
         health = v;
     }
 
-    public int getHealth() {
+    public synchronized int getHealth() {
         return health;
     }
 
@@ -79,6 +89,10 @@ public class Immortal extends Thread {
     public String toString() {
 
         return name + "[" + health + "]";
+    }
+
+    public void dead(){
+        this.alive=false;
     }
 
 }

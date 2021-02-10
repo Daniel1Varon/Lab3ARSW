@@ -8,12 +8,9 @@ package edu.eci.arsw.blacklistvalidator;
 import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
 import edu.eci.arsw.threads.HostBlackListThread;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 /**
  *
  *
@@ -34,9 +31,8 @@ public class HostBlackListsValidator {
      * @param ipaddress suspicious host's IP address.
      * @return  Blacklists numbers where the given host's IP address was found.
      */
-    public List<Integer> checkHost(String ipaddress,int n){
-
-        LinkedList<Integer> blackListOcurrences=new LinkedList<>();
+    public Collection<Integer> checkHost(String ipaddress,int n){
+        Collection<Integer> blackListOcurrences = Collections.synchronizedCollection(new ArrayList<>());
 
         int ocurrencesCount=0;
 
@@ -49,7 +45,7 @@ public class HostBlackListsValidator {
         int fin=cota;
 
         for (int i=0;i<n;i++){
-            HostBlackListThread hilo1=new HostBlackListThread(inicio,fin,ipaddress,skds);
+            HostBlackListThread hilo1=new HostBlackListThread(inicio,fin,ipaddress,skds,blackListOcurrences);
             hilos.add(hilo1);
             inicio=fin+1;
             if(fin<skds.getRegisteredServersCount()-cota && skds.getRegisteredServersCount()-cota<fin+cota) fin=skds.getRegisteredServersCount();
