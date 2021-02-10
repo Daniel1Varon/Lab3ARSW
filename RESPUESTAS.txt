@@ -1,0 +1,2 @@
+Si podria generar una condición de carrera ya que puede entrar mas de un hilo a modificar el estado de la lista al remover los inmortales muertos.
+Al ejecutar la simulación con demasiados inmortales se presenta un problema con el manejo de LinkedList, esto se puede resolver de dos formas con un synchronized o un lock para que solo un hilo lo pueda manipular a la ves y no se genere ningun error.

@@ -56,9 +56,17 @@ Para n jugadores la vida total es n*100 siendo 100 la vida de cada jugador.
 
 **Rta.** No se cumple la invariante ya que al usar la opcion pause and check cada vez va incrementando la vida total mas de lo debido.
 
+![Imagen sin implementación de wait y notifyAll](https://github.com/Daniel1Varon/Lab3ARSW/blob/main/Imagenes/Error.jpg)
+
 4. Una primera hipótesis para que se presente la condición de carrera para dicha función (pause and check), es que el programa consulta la lista cuyos valores va a imprimir, a la vez que otros hilos modifican sus valores. Para corregir esto, haga lo que sea necesario para que efectivamente, antes de imprimir los resultados actuales, se pausen todos los demás hilos. Adicionalmente, implemente la opción ‘resume’.
 
+![Imagen sin implementación de wait y notifyAll](https://github.com/Daniel1Varon/Lab3ARSW/blob/main/Imagenes/Pause.jpg)
+
 5. Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). Se cumple o no el invariante?.
+
+**Rta.** Si se cumple la invariante, siempre la vida esta en el rango de los 300 puntos.
+
+![Imagen sin implementación de wait y notifyAll](https://github.com/Daniel1Varon/Lab3ARSW/blob/main/Imagenes/Win.jpg)
 
 6. Identifique posibles regiones críticas en lo que respecta a la pelea de los inmortales. Implemente una estrategia de bloqueo que evite las condiciones de carrera. Recuerde que si usted requiere usar dos o más ‘locks’ simultáneamente, puede usar bloques sincronizados anidados:
 
@@ -70,11 +78,19 @@ Para n jugadores la vida total es n*100 siendo 100 la vida de cada jugador.
 	}
 	```
 
+**Rta.** Se solucionan las regiones criticas con una variable atomica la cual esta referenciada en la vida de los inmortales con eso se evita las condiciones de carrera.
+
+![Imagen sin implementación de wait y notifyAll](https://github.com/Daniel1Varon/Lab3ARSW/blob/main/Imagenes/Atomic.jpg)
+
 7. Tras implementar su estrategia, ponga a correr su programa, y ponga atención a si éste se llega a detener. Si es así, use los programas jps y jstack para identificar por qué el programa se detuvo.
+
+**Rta.** El programa solo se detiene al momento de ganar alguno de los inmortales.
 
 8. Plantee una estrategia para corregir el problema antes identificado (puede revisar de nuevo las páginas 206 y 207 de _Java Concurrency in Practice_).
 
 9. Una vez corregido el problema, rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo realizado en el paso 4.
+
+![Imagen sin implementación de wait y notifyAll](https://github.com/Daniel1Varon/Lab3ARSW/blob/main/Imagenes/1000.jpg)
 
 10. Un elemento molesto para la simulación es que en cierto punto de la misma hay pocos 'inmortales' vivos realizando peleas fallidas con 'inmortales' ya muertos. Es necesario ir suprimiendo los inmortales muertos de la simulación a medida que van muriendo. Para esto:
 	* Analizando el esquema de funcionamiento de la simulación, esto podría crear una condición de carrera? Implemente la funcionalidad, ejecute la simulación y observe qué problema se presenta cuando hay muchos 'inmortales' en la misma. Escriba sus conclusiones al respecto en el archivo RESPUESTAS.txt.
@@ -82,5 +98,6 @@ Para n jugadores la vida total es n*100 siendo 100 la vida de cada jugador.
 
 11. Para finalizar, implemente la opción STOP.
 
+![Imagen sin implementación de wait y notifyAll](https://github.com/Daniel1Varon/Lab3ARSW/blob/main/Imagenes/Stop.jpg)
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />Este contenido hace parte del curso Arquitecturas de Software del programa de Ingeniería de Sistemas de la Escuela Colombiana de Ingeniería, y está licenciado como <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.

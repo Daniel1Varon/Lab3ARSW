@@ -3,15 +3,18 @@ package edu.eci.arsw.highlandersim;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Immortal extends Thread {
 
     private Semaphore mutex = new Semaphore(1);
 
-    private ImmortalUpdateReportCallback updateCallback=null;
-    
-    private int health;
-    
+    private ImmortalUpdateReportCallback updateCallback = null;
+
+    private AtomicInteger health;
+
     private int defaultDamageValue;
 
     private final List<Immortal> immortalsPopulation;
@@ -22,19 +25,51 @@ public class Immortal extends Thread {
 
     private boolean alive = true;
 
+    private boolean pausa = false;
+
+    private Lock aLock = new ReentrantLock();
+
+    private Lock bLock = new ReentrantLock();
+
     public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb) {
         super(name);
-        this.updateCallback=ucb;
+        this.updateCallback = ucb;
         this.name = name;
         this.immortalsPopulation = immortalsPopulation;
-        this.health = health;
-        this.defaultDamageValue=defaultDamageValue;
+        this.health = new AtomicInteger(health);
+        this.defaultDamageValue = defaultDamageValue;
+    }
+
+    public synchronized void pausa() throws InterruptedException {
+        this.pausa = true;
+
+    }
+
+    public synchronized void reanudar() {
+        this.pausa = false;
+        synchronized (this) {
+            notifyAll();
+
+        }
     }
 
     public void run() {
 
         while (alive) {
+            synchronized (this) {
+                if (pausa) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
             Immortal im;
+
+            aLock.lock();
+            if (immortalsPopulation.size() == 1) break;
 
             int myIndex = immortalsPopulation.indexOf(this);
 
@@ -46,6 +81,7 @@ public class Immortal extends Thread {
             }
 
             im = immortalsPopulation.get(nextFighterIndex);
+            aLock.unlock();
 
             try {
                 this.fight(im);
@@ -65,12 +101,9 @@ public class Immortal extends Thread {
     public void fight(Immortal i2) throws InterruptedException {
 
         if (i2.getHealth() > 0) {
-            mutex.acquire();
-            i2.changeHealth(i2.getHealth() - defaultDamageValue);
-            this.health += defaultDamageValue;
-            updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
-            if(i2.getHealth()<=0) i2.dead();
-            mutex.release();
+            this.changeHealth(defaultDamageValue);
+            i2.changeHealth(-defaultDamageValue);
+            updateCallback.processReport("Fight: " + this + " vs " + i2 + "\n");
         } else {
             updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
         }
@@ -78,11 +111,14 @@ public class Immortal extends Thread {
     }
 
     public synchronized void changeHealth(int v) {
-        health = v;
+        health.addAndGet(v);
+        if (health.get() <= 0) {
+            dead();
+        }
     }
 
     public synchronized int getHealth() {
-        return health;
+        return health.get();
     }
 
     @Override
@@ -91,8 +127,15 @@ public class Immortal extends Thread {
         return name + "[" + health + "]";
     }
 
-    public void dead(){
-        this.alive=false;
+    public void dead() {
+        this.alive = false;
+        synchronized (immortalsPopulation) {
+            immortalsPopulation.remove(this);
+        }
+    }
+
+    public void stopp(){
+        this.alive = false;
     }
 
 }

@@ -63,6 +63,9 @@ public class ControlFrame extends JFrame {
         contentPane.setLayout(new BorderLayout(0, 0));
         setContentPane(contentPane);
 
+        JButton btnStop = new JButton("STOP");
+        JButton btnPauseAndCheck = new JButton("Pause and check");
+        JButton btnResume = new JButton("Resume");
         JToolBar toolBar = new JToolBar();
         contentPane.add(toolBar, BorderLayout.NORTH);
 
@@ -86,20 +89,25 @@ public class ControlFrame extends JFrame {
                         im.start();
                     }
                 }
-
+                btnResume.setEnabled(true);
                 btnStart.setEnabled(false);
-
+                btnStop.setEnabled(true);
+                btnPauseAndCheck.setText("Pause and check");
             }
         });
         toolBar.add(btnStart);
 
-        JButton btnPauseAndCheck = new JButton("Pause and check");
+
         btnPauseAndCheck.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
-                /*
-                 * COMPLETAR
-                 */
+                for (Immortal im : immortals) {
+                    try {
+                        im.pausa();
+                    } catch (InterruptedException interruptedException) {
+                        interruptedException.printStackTrace();
+                    }
+                }
                 int sum = 0;
                 for (Immortal im : immortals) {
                     sum += im.getHealth();
@@ -112,13 +120,12 @@ public class ControlFrame extends JFrame {
         });
         toolBar.add(btnPauseAndCheck);
 
-        JButton btnResume = new JButton("Resume");
 
         btnResume.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                /**
-                 * IMPLEMENTAR
-                 */
+                for (Immortal im : immortals) {
+                    im.reanudar();
+                }
 
             }
         });
@@ -133,7 +140,22 @@ public class ControlFrame extends JFrame {
         toolBar.add(numOfImmortals);
         numOfImmortals.setColumns(10);
 
-        JButton btnStop = new JButton("STOP");
+
+        btnStop.setEnabled(false);
+
+        btnStop.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btnStop.setEnabled(false);
+                btnResume.setEnabled(false);
+                btnPauseAndCheck.setText("Check");
+                for (Immortal im : immortals) {
+                    synchronized (immortals) {
+                        im.stopp();
+                    }
+                }
+
+            }
+        });
         btnStop.setForeground(Color.RED);
         toolBar.add(btnStop);
 
@@ -189,11 +211,11 @@ class TextAreaUpdateReportCallback implements ImmortalUpdateReportCallback {
 
         //move scrollbar to the bottom
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JScrollBar bar = jsp.getVerticalScrollBar();
-                bar.setValue(bar.getMaximum());
-                }
-        }
+                                                   public void run() {
+                                                       JScrollBar bar = jsp.getVerticalScrollBar();
+                                                       bar.setValue(bar.getMaximum());
+                                                   }
+                                               }
         );
 
     }
